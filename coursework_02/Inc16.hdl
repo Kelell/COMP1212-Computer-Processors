@@ -1,0 +1,17 @@
+// This file is part of coursework 2 for COMP1212
+// which follows the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// Written by Sam Wilson
+
+/**
+ * 16-bit incrementer: out = x + 1 (arithmetic addition)
+ */
+
+CHIP Inc16 {
+    IN x[16];
+    OUT out[16];
+
+    PARTS:
+    Add16(x[0..15]=x[0..15], y[0]=true, y[1..15]=false, out[0..15]=out[0..15]);
+
+}

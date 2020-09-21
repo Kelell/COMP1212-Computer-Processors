@@ -1,0 +1,49 @@
+// This file is part of coursework 2 for COMP1212
+// which follows the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// Written by Sam Wilson
+
+
+/**
+ * The ALU. Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * The bit-combinations that yield each function are
+ * documented in the book. In addition, the ALU
+ * computes two 1-bit outputs: if the ALU output
+ * is 0, zr is set to 1; otherwise zr is set to 0;
+ * If out<0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+CHIP ALU {
+    IN x[16], y[16], zx, nx, zy, ny, f, no;
+    OUT out[16], zr, ng;
+
+    PARTS:
+    //inputs
+
+    Mux16(x=x, y=false, sel=zx, out=inzx);
+    Not16(x=inzx, out=notzx);
+    Mux16(x=inzx, y=notzx, sel=nx, out=inputx);
+
+    Mux16(x=y, y=false, sel=zy, out=inzy);
+    Not16(x=inzy, out=notzy);
+    Mux16(x=inzy, y=notzy, sel=ny, out=inputy);
+
+    //f-bit
+    And16(x=inputx, y=inputy, out=prefouta);
+    Add16(x=inputx, y=inputy, out=prefoutb);
+    Mux16(x=prefouta, y=prefoutb, sel=f, out=fout);
+
+    //output
+    Not16(x=fout, out=notfout);
+    Mux16(x=fout, y=notfout, sel=no, out[15]=ng, out[0..7]=part1, out[8..15]=part2, out=out);
+
+    // if all of out = 0, then Or8Way(out[0..7]) or Or8Way(out[8..15]) is false ...
+    Not(x=nonzero, out=zr);
+    Or(x=or1, y=or2, out=nonzero); // checking if any digits are nonzero
+    Or8Way(x=part1, out=or1); // checking each 8-bit chunk for nonzero
+    Or8Way(x=part2, out=or2);
+
+}
